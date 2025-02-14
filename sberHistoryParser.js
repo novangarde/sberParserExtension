@@ -1,4 +1,23 @@
-  "use strict";
+"use strict";
+
+const parseBtn = document.getElementById("parse");
+parseBtn.addEventListener("click", () => {
+  chrome.tabs.query({active: true}, (tabs) => {
+    let tabId = tabs[0].id;
+    if (tabId) {
+      chrome.scripting.executeScript(
+        {
+          target:{tabId: tabId, allFrames: true},
+          func:parseSberWrapper
+        }
+      ).then(() => console.log('done'));
+    } else {
+      alert("There are no active tabs")
+    }
+  })
+});
+
+function parseSberWrapper() {
 
   let htmlHeader = `<!DOCTYPE html>
   <html lang="ru">
@@ -76,26 +95,6 @@
   let profitAndLoss = {
     objects: [],
   };
-  
-  // Раскомментировать, чтобы работало в браузерном приложении
-  // const parseBtn = document.getElementById("parse");
-  // parseBtn.addEventListener("click", () => {
-  //   parseSber();
-  // });
-
-  // parseBtn.addEventListener("click", () => {
-  //   chrome.tabs.query({active: true}, (tabs) => {
-  //     let tab = tabs[0].id;
-  //     if (tab) {
-  //         console.log(tab);
-  //     } else {
-  //         alert("There are no active tabs")
-  //     }
-  //   })
-  // });
-  
-  // Раскомментировать, чтобы работало в консоли
-  parseSber();
 
   function parseSber() {
     const days = document.querySelectorAll("Section");
@@ -239,3 +238,8 @@
     newWindow.document.write(html);
     newWindow.document.close();
   }
+
+  if (document.URL.includes('online.sberbank.ru/operations')) {
+    parseSber();
+  }
+}
